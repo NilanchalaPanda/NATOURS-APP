@@ -4,7 +4,6 @@ const Tour = require('./../models/tourModels');
 exports.getAllTours = async (req, res) => {
 
     try{
-
         // BUILDING QUERY :
 
         // 1) FILTERING :
@@ -37,10 +36,10 @@ exports.getAllTours = async (req, res) => {
         // 2) Advanced Filtering :
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}` )
-        console.log('Query String :')
-        console.log(JSON.parse(queryStr));
+        // console.log('Query String :')
+        // console.log(JSON.parse(queryStr));
         // console.log(queryStr) 
-        console.log(req.query)
+        // console.log(req.query)
 
         let query = Tour.find(JSON.parse(queryStr));
  
@@ -49,15 +48,44 @@ exports.getAllTours = async (req, res) => {
         // 3) SORTING 
         if(req.query.sort){
             const sortBy = req.query.sort.split(",").join(' ');
-            console.log(sortBy);
+            // console.log(sortBy);
             query = query.sort(sortBy);
         }else{
             query = query.sort('-createAt');
         }
 
 
+        // 4) FIELD LIMITING DATA
+        if(req.query.fields){
+            const fields = req.query.fields.split(",").join(' ');
+            query = query.select(fields);
+        }else{
+            query = query.select('-__v');
+        }
+
+        // console.log(req.query);
+        // console.log(req.query.fields);
         
+
+        // 5) PAGINATION 
+
+        const page = (req.query.page * 1)  || 1
+        const limit = req.query.limit * 1 || 8;
+        const skip = (page - 1)*limit;
+
+        query = query.skip(skip).limit(limit);
+
+        if(req.query.page){
+            const numTours = await Tour.countDocuments();
+            if(skip >= numTours) {
+                // This will immediately skip it to then next block and will go into the catch block.
+                throw new Error("This page doesnot exist");
+            }
+        }
+
         // FINAL STEP ------> Execute query <------
+        console.log(req.query);
+
         const tours = await query;
 
         // SENDING RESPONE :
