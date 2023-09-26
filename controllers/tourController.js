@@ -5,13 +5,24 @@ exports.getAllTours = async (req, res) => {
 
     try{
 
-        console.log(`Parameters : ${req.query}`);
+        // BUILDING QUERY :
+
+        // 1) FILTERING :
+        const queryObj = {...req.query};
+        const excludeFields = ['page', 'sort', 'limit', 'fields'];
+
+        excludeFields.forEach(el => delete queryObj[el]);
+
+        // console.log(req.query);
+        
+        // SAME AS FIRST WAY :
+        // const tours = await Tour.find(queryObj);
 
         //  ONE WAY OF FILTERING DATA :
-        const tours = await Tour.find({
-            "duration": 5,
-            "difficulty": 'easy'
-        });
+        // const tours = await Tour.find({
+        //     duration: 5,
+        //     difficulty: 'easy'
+        // });
 
         // ANOTHER way of filtering Data : 
         // const tours = await Tour.find()
@@ -19,7 +30,24 @@ exports.getAllTours = async (req, res) => {
         //     .equals(5)
         //     .where("difficulty")
         //     .equals("easy")
-    
+
+        /* ***************************** */
+        // TO IMPLEMENT DIFFERENT FUNCTIONALITIES LIKE SORTING, PAGINATION ETC.
+
+        // 2) Advanced Filtering :
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}` )
+        console.log('Query String :')
+        console.log(JSON.parse(queryStr));
+        // console.log(queryStr) 
+
+        const query = Tour.find(JSON.parse(queryStr));
+ 
+        // Execute query ---
+        const tours = await query;
+         
+
+        // SENDING RESPONE :
         res.status(200).json({
             status: 'success',
             results: tours.length,
