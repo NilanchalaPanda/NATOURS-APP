@@ -1,5 +1,5 @@
 const Tour = require('./../models/tourModels');
-const APIFeatures = require('./../utils/apiFeatures ')
+const APIFeatures = require('./../utils/apiFeatures')
 
 exports.alisaTopTour = (req, res, next) => {
     // PRE FILLIG THE QUERY FOR THE USER
@@ -135,7 +135,7 @@ exports.getTourStats = async (req, res) => {
             },
             {
                 $group: {
-                    _id: "medium",
+                    _id: "$difficulty",
                     numTours: { $sum: 1 },
                     numRatings: { $sum: '$ratingsQuantity' },
                     avgRating: { $avg: '$ratingsAverage' },
@@ -143,6 +143,9 @@ exports.getTourStats = async (req, res) => {
                     minPrice: { $min: '$price' },
                     maxPrice: { $max: '$price' },
                 }
+            },
+            {
+                $sort: { avgPrice : 1 }
             }
         ]);
         res.status(200).json({
@@ -154,6 +157,27 @@ exports.getTourStats = async (req, res) => {
     }
 
     catch (err) {
+        res.status(404).json({
+            status: "Fail",
+            message: err
+        })
+    }
+}
+
+exports.getMonthPlan = async (res, req) => {
+    try{
+        const year = req.param.year * 1;
+        
+        const plan = await Tour.aggregate([])
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                stats
+            },
+        });
+    }
+    catch(err){
         res.status(404).json({
             status: "Fail",
             message: err
