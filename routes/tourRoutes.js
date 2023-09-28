@@ -5,6 +5,8 @@ const router = express.Router();
 
 // router.param('id', tourController.checkID);
 
+// 127.0.0.1:api/v1/tours/{:id}
+
 router.
     route('/top-5-cheap')
     .get(tourController.alisaTopTour, tourController.getAllTours);
