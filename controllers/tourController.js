@@ -1,6 +1,16 @@
 // const fs = require("fs");
 const Tour = require('./../models/tourModels');  
 
+exports.alisaTopTour = (req, res, next) => {
+    // PRE FILLIG THE QUERY FOR THE USER
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+    next();
+};
+
+class APIFeatures {}
+
 exports.getAllTours = async (req, res) => {
 
     try{
@@ -70,7 +80,7 @@ exports.getAllTours = async (req, res) => {
         // 5) PAGINATION 
 
         const page = (req.query.page * 1)  || 1
-        const limit = req.query.limit * 1 || 8;
+        const limit = (req.query.limit * 1) || 8;
         const skip = (page - 1)*limit;
 
         query = query.skip(skip).limit(limit);
@@ -189,6 +199,38 @@ exports.deleteTour = async (req, res) => {
             message: "Invalid dataset"
         })
     }
+}
 
-    
+exports.getTourStats = async (req, res) => {
+    try{
+        const stats = await Tour.aggregate([
+            {
+                $match: { ratingsAverage: { $gte: 4.3 } }
+            },
+            {
+                $group: {
+                    _id: "medium",
+                    numTours : { $sum: 1 },
+                    numRatings : { $sum: '$ratingsQuantity' },
+                    avgRating: { $avg: '$ratingsAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' },
+                }
+            }
+        ]);
+        res.status(200).json({
+            status: 'success',
+            data: { 
+                stats
+            },
+        });
+    }
+
+    catch (err) {
+        res.status(404).json({
+            status: "Fail",
+            message: err
+        })
+    }
 }
