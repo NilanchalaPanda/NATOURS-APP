@@ -1,5 +1,5 @@
 const Tour = require('./../models/tourModels');
-const APIFeatures = require('./../utils/apiFeatures')
+const APIFeatures = require('./../utils/apiFeatures');
 
 exports.alisaTopTour = (req, res, next) => {
     // PRE FILLIG THE QUERY FOR THE USER
@@ -164,20 +164,54 @@ exports.getTourStats = async (req, res) => {
     }
 }
 
-exports.getMonthPlan = async (res, req) => {
+exports.getMonthPlan = async (req, res) => {
     try{
-        const year = req.param.year * 1;
+        const year = req.params.year * 1;
         
-        const plan = await Tour.aggregate([])
+        const plan = await Tour.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: { 
+                    startDates: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {$month: '$startDates'},
+                    numTourStats: { $sum: 1 },
+                    tours: { $push: '$name' }
+                },
+            },
+            {
+                $addFields: { month: '$_id' }
+            },
+            {
+                $project:{
+                    _id: 0
+                }
+            },
+            {
+                $sort: { numTourStats: 1 }
+            }, 
+            {
+                //Sets a limit to the data
+                $limit: 12      
+            }
+        ]);
 
         res.status(200).json({
             status: 'success',
             data: {
-                stats
-            },
+                plan
+            }
         });
     }
-    catch(err){
+    catch (err) {
         res.status(404).json({
             status: "Fail",
             message: err
