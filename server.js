@@ -22,6 +22,7 @@ mongoose.connect(DB, {
     useUnifiedTopology: true
 }).then(() => {
     console.log('DB CONNECTION ESTABLISHED');
+    console.log(process.env.NODE_ENV);
 });
 
 // START THE SERVER
