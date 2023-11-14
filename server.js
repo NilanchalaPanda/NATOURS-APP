@@ -1,4 +1,4 @@
-////// THIS IS FOR THE CODE THAT IS REQUIRED FOR THE SRVER.
+////// THIS IS FOR THE CODE THAT IS REQUIRED FOR THE SERVER.
 
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -12,7 +12,7 @@ const DB = process.env.DATABASE.replace(
     process.env.DATABASE_PASSWORD
 );
 
-// console.log(DB);
+console.log(DB);
 
 // It return a promise that is why, "then --> to return an successfull response" & "catch --> To catch error" is used.
 mongoose.connect(DB, {
