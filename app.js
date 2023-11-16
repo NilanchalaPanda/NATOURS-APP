@@ -3,26 +3,26 @@
 const express = require("express");
 const morgan = require("morgan");
 
-const AppError = require('./utils/appError');
-const globalErrorHandler = require('./controllers/errorController');
+const AppError = require("./utils/appError");
+const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 
 const app = express();
 
 //*** MIDDLEWARES FROM EXPRESS ***//
-if(process.env.NODE_ENV === 'development'){
-    app.use(morgan('dev'));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
 }
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 
-// CUSTOM MIDDLEWARES : 
+// CUSTOM MIDDLEWARES :
 app.use((req, res, next) => {
-    console.log("Hello World from the middleware 👋🏻");
-    next();
+  console.log("Hello World from the middleware 👋🏻");
+  next();
 });
- 
+
 /* MY CODE */
 /////***** ROUTES ******//////
 
@@ -43,20 +43,19 @@ app.use((req, res, next) => {
 
 // BETTER WAY ..... inside tourRoutes && userRoutes files.
 
-app.use('/api/v1/tours', tourRouter);
-app.use('/api/v1/users', userRouter);
+app.use("/api/v1/tours", tourRouter);
+app.use("/api/v1/users", userRouter);
 
-// Handling all the routes other then the defined one's : 
-app.all('*', (req, res, next) =>{
-    // const err = new Error(`Can't find ${req.originalUrl} in this server !!`);
-    // err.statusCode = 404;
-    // err.status = 'Fail',
+// Handling all the routes other then the defined one's :
+app.all("*", (req, res, next) => {
+  // const err = new Error(`Can't find ${req.originalUrl} in this server !!`);
+  // err.statusCode = 404;
+  // err.status = 'Fail',
 
-    next(new AppError(`Can't find ${req.originalUrl} in this server !!`, 404));
+  next(new AppError(`Can't find ${req.originalUrl} in this server !!`, 404));
 });
 
-
-// GLOBAL ERROR HANDLING FUNCTION : 
+// GLOBAL ERROR HANDLING FUNCTION :
 app.use(globalErrorHandler);
 
 module.exports = app;
